@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinook Music Database Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+        }
+        main {
+            padding: 2rem;
+        }
+        h1, h2, h3 {
+            color: #4CAF50;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin: 0.5rem 0;
+        }
+        pre {
+            background-color: #eee;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .visualization img {
+            max-width: 100%;
+            height: auto;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🎵 Chinook Music Database Analysis</h1>
+    </header>
+    <main>
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#objective">Objective</a></li>
+            <li><a href="#data-source">Data Source</a></li>
+            <li><a href="#tools-used">Tools Used</a></li>
+            <li><a href="#data-analysis-process">Data Analysis Process</a></li>
+            <li><a href="#key-insights">Key Insights</a></li>
+            <li><a href="#conclusion">Conclusion</a></li>
+            <li><a href="#recommendations">Recommendations</a></li>
+        </ul>
+
+        <h2 id="introduction">Introduction</h2>
+        <p>This project explores the Chinook Music Database, a dataset commonly used for SQL learning and practice. It contains information about customers, invoices, tracks, artists, and genres, making it ideal for analyzing music sales and customer behavior.</p>
+        <h2 id="objective">Objective</h2>
+        <ul>
+            <li>Identify the top-performing artists, genres, and customer segments.</li>
+            <li>Explore trends in yearly sales and customer purchasing patterns.</li>
+            <li>Provide actionable insights for better decision-making in music product marketing.</li>
+        </ul>
+
+        <h2 id="data-source">Data Source</h2>
+        <p>The analysis was conducted on the Chinook SQLite database, which consists of multiple tables linked by unique keys. Key data elements include:</p>
+        <ul>
+            <li>Customer data</li>
+            <li>Invoice and transaction data</li>
+            <li>Music track, album, and genre details</li>
+            <li>Artist and employee data</li>
+        </ul>
+
+        <h2 id="tools-used">Tools Used</h2>
+        <ul>
+            <li>SQLite: Database querying and data extraction.</li>
+            <li>Excel: Additional data cleaning.</li>
+            <li>Power BI: Data visualization and reporting.</li>
+        </ul>
+
+        <h2 id="data-analysis-process">Data Analysis Process</h2>
+        <ol>
+            <li>Database Exploration: Querying tables to understand structure and relationships.</li>
+            <li>Data Cleaning: Removing duplicates, handling nulls, and standardizing formats.</li>
+            <li>Metrics Creation: Generating KPIs and calculated columns.</li>
+            <li>Visualization: Creating dashboards for insights.</li>
+        </ol>
+
+        <h3>Sample SQL Query</h3>
+        <pre>
+SELECT 
+    ar.Name AS ArtistName, 
+    SUM(inv.UnitPrice * inv.Quantity) AS TotalSales, 
+    iv.InvoiceDate, 
+    c.FirstName || ' ' || c.LastName AS FullName, 
+    COUNT(DISTINCT iv.InvoiceId) AS TotalPurchases, 
+    AVG(inv.UnitPrice * inv.Quantity) AS AvgTotalSales, 
+    MAX(iv.InvoiceDate) AS LastPurchaseDate,
+    c.CustomerId,
+    STRFTIME('%Y', iv.InvoiceDate) AS Year, 
+    COUNT(t.TrackId) AS TracksSold,
+    RANK() OVER (PARTITION BY STRFTIME('%Y', iv.InvoiceDate) ORDER BY COUNT(t.TrackId) DESC) AS Rank, 
+    g.Name AS GenreName
+FROM artists AS ar
+LEFT JOIN albums AS a ON ar.ArtistId = a.ArtistId
+LEFT JOIN tracks AS t ON a.AlbumId = t.AlbumId
+LEFT JOIN invoice_items AS inv ON t.TrackId = inv.TrackId
+LEFT JOIN invoices AS iv ON inv.InvoiceId = iv.InvoiceId
+RIGHT JOIN customers AS c ON c.CustomerId = iv.CustomerId
+RIGHT JOIN genres AS g ON t.GenreId = g.GenreId
+GROUP BY GenreName, FullName
+ORDER BY TracksSold, TotalSales DESC;
+        </pre>
+
+        <h2 id="key-insights">Key Insights</h2>
+        <ol>
+            <li><strong>Top Customers and Regions:</strong> The USA had the highest sales and the largest number of high-value customers.</li>
+            <li><strong>Top Artists and Tracks:</strong> Iron Maiden emerged as the artist with the highest revenue and album sales. However, sales declined in 2011.</li>
+            <li><strong>Top Genres:</strong> Rock dominated with the highest track count and revenue contribution.</li>
+            <li><strong>Yearly Sales Trends:</strong> 2010 recorded the highest sales overall, driven by rock releases.</li>
+            <li><strong>Customer Preferences:</strong> Customers preferred purchasing full albums over single tracks, with album bundles driving revenue.</li>
+        </ol>
+
+        <h2 id="conclusion">Conclusion</h2>
+        <p>The Chinook Music Database provides valuable insights into customer preferences, sales trends, and music popularity. Key takeaways include:</p>
+        <ul>
+            <li>Rock is the most profitable genre, with Iron Maiden leading despite a decline in recent years.</li>
+            <li>The USA is the dominant region for sales, making it a priority target for marketing efforts.</li>
+            <li>Diversifying genres and focusing on new artists can drive future growth.</li>
+        </ul>
+
+        <h2 id="recommendations">Recommendations</h2>
+        <ul>
+            <li><strong>Targeted Marketing:</strong> Focus on North American and European customers who contribute the most revenue.</li>
+            <li><strong>Genre Diversification:</strong> Invest in promoting Pop and Jazz to balance dependency on Rock.</li>
+            <li><strong>Digital Distribution:</strong> Encourage customers to purchase digital bundles and subscriptions for consistent revenue.</li>
+            <li><strong>Track New Artists:</strong> Identify and promote up-and-coming artists in Rock and Pop to maintain dominance in these genres.</li>
+        </ul>
+
+        <h2>Visualizations</h2>
+        <div class="visualization">
+            <h3>Dashboard Example 1: Sales per Country</h3>
+            <img src="/chin 2.PNG" alt="">
+            <h3>Dashboard Example 2: Customers segements</h3>
+            <img src="/chin 3.PNG" alt="">
+            <h3>Dashboard Example 3: Genre popularity</h3>
+            <img src="/chin 5.PNG" alt="">
+            <h3>Dashboard Example 3: Total sales per month and year</h3>
+            <img src="/chin 6.PNG" alt="">
+            <h3>Dashboard Example 3: Customer life time value</h3>
+            <img src="/chin 7.PNG" alt="">
+            <h3>Dashboard Example 3: Recommendations</h3>
+            <img src="/chin 8.PNG" alt="">
+        </div>
+    </main>
